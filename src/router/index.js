@@ -13,18 +13,18 @@ const router = createRouter({
     {
       path: '/contact/create',
       name: 'contact.create',
-      component: Contact
+      component: () => import('@/views/Contact.vue')
     },
     {
       path: '/contact/:id',
       name: 'contact.show',
-      component: Contact,
+      component: () => import('@/views/ContactShow.vue'),
       props: true
     },
     {
       path: '/contact/:id/edit',
       name: 'contact.edit',
-      component: Contact,
+      component: () => import('@/views/Contact.vue'),
       props: true
     }
   ]
