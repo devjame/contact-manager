@@ -10,7 +10,7 @@ import { RouterLink, RouterView } from 'vue-router'
       </v-app-bar-title>
 
       <template v-slot:append>
-        <v-btn v-if="$route.name === 'home'" to="contact">New Contact</v-btn>
+        <v-btn v-if="$route.name === 'home'" :to="{ name: 'contact.create' }">New Contact</v-btn>
       </template>
     </v-app-bar>
 

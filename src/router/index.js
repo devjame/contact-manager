@@ -11,14 +11,21 @@ const router = createRouter({
       component: Index
     },
     {
-      path: '/create',
+      path: '/contact/create',
       name: 'contact.create',
       component: Contact
     },
     {
-      path: '/:id',
+      path: '/contact/:id',
+      name: 'contact.show',
+      component: Contact,
+      props: true
+    },
+    {
+      path: '/contact/:id/edit',
       name: 'contact.edit',
-      component: Contact
+      component: Contact,
+      props: true
     }
   ]
 })

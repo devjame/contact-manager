@@ -12,34 +12,41 @@
           :subtitle="contact.contact"
           :text="contact.email"
         >
+          <v-card-actions>
+            <v-btn color="info" :to="{ name: 'contact.edit', params: { id: contact.id } }">
+              Edit
+            </v-btn>
+            <v-btn color="error" @click="openDialog(contact.id)"> Delete </v-btn>
+          </v-card-actions>
         </v-card>
       </v-col>
+      <v-dialog v-model="dialog" :scrim="false" persistent width="auto">
+        <v-card color="primary" title="Are you sure you want to delete this item?">
+          <v-card-actions>
+            <v-btn @click="remove()"> Yes </v-btn>
+            <v-btn @click="dialog = false"> No </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
     </v-row>
   </v-container>
 </template>
 <script setup>
-import { onMounted, ref } from 'vue'
-import { faker } from '@faker-js/faker'
+import { ref } from 'vue'
+import { useContact } from '../composables/contacts'
 
-const contacts = ref([])
+const { contacts, destroyContact } = useContact()
 
-function createRandomContact() {
-  let firstName = faker.person.firstName()
-  let lastName = faker.person.lastName()
-  return {
-    id: faker.string.uuid(),
-    name: firstName + ' ' + lastName,
-    email: faker.internet.email({ firstName, lastName }),
-    contact: faker.phone.number('### ### ###'),
-    picture: faker.image.avatar()
-  }
-}
-function generateContacts(size = 5) {
-  for (let i = 0; i < size; i++) {
-    contacts.value.push(createRandomContact())
-  }
+const dialog = ref(false)
+const contactId = ref()
+
+function openDialog(id) {
+  dialog.value = true
+  contactId.value = id
 }
 
-console.log(contacts)
-onMounted(() => generateContacts(10))
+function remove() {
+  destroyContact(contactId)
+  dialog.value = false
+}
 </script>

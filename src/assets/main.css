@@ -1,0 +1,14 @@
+a {
+  text-decoration: none;
+  color: #000;
+}
+
+a:hover {
+  color: orange;
+}
+
+a:router-link-active,
+a:router-link-exact-active {
+  color: orange;
+  text-decoration: underline;
+}
