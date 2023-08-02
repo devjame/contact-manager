@@ -2,6 +2,10 @@ import { ref, onMounted } from 'vue'
 import { faker } from '@faker-js/faker'
 import http from '@/services/http-common'
 
+/**
+ * refactor to work with the json-server
+ * @returns
+ */
 export function useContact() {
   const contacts = ref([])
   const contact = ref({})
@@ -67,6 +71,7 @@ export function useContact() {
   }
 
   async function destroyContact(id) {
+    // check why the last value is delete and why it always return -1
     //await http.post(`/contacts/${id}`)
     contacts.value = contacts.value.filter((item) => item.id !== id)
   }
