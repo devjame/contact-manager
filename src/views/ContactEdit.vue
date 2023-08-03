@@ -2,31 +2,30 @@
   <v-container fuild>
     <v-row class="mt-4">
       <v-card class="w-50 pa-4">
-        <v-card-title v-if="route.name !== 'contact.edit'">New Contact</v-card-title>
-        <v-card-title v-else>Edit Contact </v-card-title>
+        <v-card-title>Edit Contact </v-card-title>
         <v-card-text>
-          <v-form @submit.prevent="submit">
+          <v-form @submit.prevent="submit" ref="formRef">
             <v-text-field
               v-model="contactForm.name"
-              :rules="contactForm.nameRules"
+              :rules="rules.nameRules"
               label="Name"
               required
             ></v-text-field>
             <v-text-field
               v-model="contactForm.contact"
-              :rules="contactForm.contactRules"
+              :rules="rules.contactRules"
               label="Phone Number"
               required
             ></v-text-field>
             <v-text-field
               v-model="contactForm.email"
-              :rules="contactForm.emailRules"
+              :rules="rules.emailRules"
               label="Email"
               required
             ></v-text-field>
             <v-file-input
               v-model="contactForm.files"
-              :rules="contactForm.filesRules"
+              :rules="rules.filesRules"
               accept="image/*"
               label="Picture"
               @change="uploadImage"
@@ -40,7 +39,7 @@
   </v-container>
 </template>
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { useContact } from '../composables/contacts'
@@ -51,10 +50,12 @@ const props = defineProps({
   }
 })
 
+const formRef = ref()
+
 const route = useRoute()
 const router = useRouter()
 
-const { storeContact, updateContact, getContact, contact, uploadAvatar } = useContact()
+const { updateContact, getContact, contact, uploadAvatar } = useContact()
 
 const uploadImage = async (evt) => {
   const file = evt.target.files[0]
@@ -64,8 +65,7 @@ const uploadImage = async (evt) => {
   contactForm.value.picture = filePath
 }
 
-const contactForm = ref({
-  name: contact?.value.name,
+const rules = {
   nameRules: [
     (value) => {
       if (value?.length > 5) return true
@@ -73,7 +73,6 @@ const contactForm = ref({
       return 'First name must be at least 5 characters.'
     }
   ],
-  email: contact?.value.email,
   emailRules: [
     (value) => {
       if (/^[a-z.-]+@[a-z.-]+\.[a-z]+$/i.test(value)) return true
@@ -81,7 +80,6 @@ const contactForm = ref({
       return 'Must be a valid email.'
     }
   ],
-  contact: contact?.value.contact,
   contactRules: [
     (value) => {
       if (value?.length === 9 && /[0-9-]+/.test(value)) return true
@@ -89,7 +87,6 @@ const contactForm = ref({
       return 'Phone number needs to be at least 9 digits.'
     }
   ],
-  picture: contact?.value.picture,
   pictureRules: [
     (value) => {
       if (value) return true
@@ -97,16 +94,23 @@ const contactForm = ref({
       return 'Select an picture.'
     }
   ]
+}
+const contactForm = reactive({
+  name: contact?.value.name,
+  email: contact?.value.email,
+  contact: contact?.value.contact,
+  picture: contact?.value.picture
 })
 
 function submit() {
-  console.log(contactForm.value)
-  storeContact({
-    name: contactForm.value.name,
-    email: contactForm.value.email,
-    contact: contactForm.value.contact,
-    picture: contactForm.value.picture
-  })
+  if (formRef.value.validate()) {
+    updateContact({
+      name: contactForm.value.name,
+      email: contactForm.value.email,
+      contact: contactForm.value.contact,
+      picture: contactForm.value.picture
+    })
+  }
 
   router.push({ name: 'home' })
 }

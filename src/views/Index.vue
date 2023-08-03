@@ -7,11 +7,15 @@
     <v-row>
       <v-col v-for="contact in contacts" :key="contact.id" cols="4">
         <v-card
-          :prepend-avatar="contact.picture"
-          :title="contact.name"
+          :prepend-avatar="getAvatarUrl(contact.picture)"
           :subtitle="contact.contact"
           :text="contact.email"
         >
+          <template #title>
+            <router-link :to="{ name: 'contact.show', params: { id: contact.id } }">
+              {{ contact.name }}
+            </router-link>
+          </template>
           <v-card-actions>
             <v-btn color="info" :to="{ name: 'contact.edit', params: { id: contact.id } }">
               Edit
@@ -35,7 +39,7 @@
 import { ref } from 'vue'
 import { useContact } from '../composables/contacts'
 
-const { contacts, destroyContact } = useContact()
+const { contacts, destroyContact, getAvatarUrl } = useContact()
 
 const dialog = ref(false)
 const contactId = ref()
@@ -46,7 +50,7 @@ function openDialog(id) {
 }
 
 function remove() {
-  destroyContact(contactId)
+  destroyContact(contactId.value)
   dialog.value = false
 }
 </script>
