@@ -1,6 +1,5 @@
 import { ref, onMounted } from 'vue'
 import { faker } from '@faker-js/faker'
-import http from '@/services/http-common'
 import { supabase } from '@/services/supabaseClient'
 /**
  * refactor to work with the json-server
@@ -9,21 +8,6 @@ import { supabase } from '@/services/supabaseClient'
 export function useContact() {
   const contacts = ref([])
   const contact = ref({})
-
-  /**
-   * function generateContact() {
-    let firstName = faker.person.firstName()
-    let lastName = faker.person.lastName()
-    let _id = generateID()
-    return {
-      id: _id,
-      name: firstName + ' ' + lastName,
-      email: faker.internet.email({ firstName, lastName }),
-      contact: faker.phone.number('### ### ###'),
-      picture: faker.image.avatar()
-    }
-  }
-  */
 
   function generateID() {
     return faker.string.nanoid(10)
@@ -54,16 +38,6 @@ export function useContact() {
     return data.publicUrl
   }
 
-  function checkUnique(key, value) {
-    const data = contacts.value.filter((item) => item[key] === value)
-
-    if (data) {
-      return true
-    }
-
-    return false
-  }
-
   async function getContacts() {
     try {
       //let response = await http.get('/contacts')
@@ -83,7 +57,7 @@ export function useContact() {
       //let response = await http.get(`/contacts/${id}`)
       const { data, error } = await supabase.from('contacts').select('*').eq('id', id)
       contact.value = data[0]
-
+      getContacts()
       if (error) throw error
     } catch (error) {
       return error.message
@@ -92,8 +66,8 @@ export function useContact() {
 
   async function storeContact(payload) {
     try {
-      const { status, error } = await supabase.from('contacts').insert(payload).select()
-      console.log(status)
+      const { error } = await supabase.from('contacts').insert(payload).select()
+
       if (error) throw error
     } catch (error) {
       return error.message
@@ -111,19 +85,6 @@ export function useContact() {
   }
 
   async function updateContact(id) {
-    //await http.put(`/contacts/${id}`, contact.value)
-    /**
-     contacts.value = contacts.value.map((item) => {
-       if (item.id === id) {
-         ;(item.name = contact.value.name),
-           (item.contact = contact.value.contact),
-           (item.email = contact.value.email)
-         item.picture = contact.value.picture
-       }
-       return item
-     })
-     * 
-     */
     try {
       const { data, error } = await supabase.from('contacts').update(data).eq('id', id).select()
       if (error) throw error
@@ -144,7 +105,6 @@ export function useContact() {
     destroyContact,
     updateContact,
     storeContact,
-    checkUnique,
     uploadAvatar,
     downloadAvatar,
     getAvatarUrl

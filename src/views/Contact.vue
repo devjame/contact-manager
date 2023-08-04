@@ -2,31 +2,30 @@
   <v-container fuild>
     <v-row class="mt-4">
       <v-card class="w-50 pa-4">
-        <v-card-title v-if="route.name !== 'contact.edit'">New Contact</v-card-title>
-        <v-card-title v-else>Edit Contact </v-card-title>
+        <v-card-title>New Contact</v-card-title>
         <v-card-text>
-          <v-form @submit.prevent="submit">
+          <v-form @submit.prevent="submit" ref="formRef">
             <v-text-field
-              v-model="contactForm.name"
-              :rules="contactForm.nameRules"
+              v-model="form.name"
+              :rules="rules.nameRules"
               label="Name"
               required
             ></v-text-field>
             <v-text-field
-              v-model="contactForm.contact"
-              :rules="contactForm.contactRules"
+              v-model="form.contact"
+              :rules="rules.contactRules"
               label="Phone Number"
               required
             ></v-text-field>
             <v-text-field
-              v-model="contactForm.email"
-              :rules="contactForm.emailRules"
+              v-model="form.email"
+              :rules="rules.emailRules"
               label="Email"
               required
             ></v-text-field>
             <v-file-input
-              v-model="contactForm.files"
-              :rules="contactForm.filesRules"
+              v-model="form.files"
+              :rules="rules.filesRules"
               accept="image/*"
               label="Picture"
               @change="uploadImage"
@@ -54,18 +53,18 @@ const props = defineProps({
 const route = useRoute()
 const router = useRouter()
 
-const { storeContact, updateContact, getContact, contact, uploadAvatar } = useContact()
+const { storeContact, getContact, uploadAvatar } = useContact()
 
-const uploadImage = async (evt) => {
-  const file = evt.target.files[0]
-  const fileExt = file.name.split('.').pop()
-  const filePath = `${Math.random()}.${fileExt}`
-  let { error: uploadError } = uploadAvatar(filePath, file)
-  contactForm.value.picture = filePath
-}
+const formRef = ref()
 
-const contactForm = ref({
-  name: contact?.value.name,
+const form = ref({
+  name: '',
+  email: '',
+  contact: '',
+  picture: ''
+})
+
+const rules = {
   nameRules: [
     (value) => {
       if (value?.length > 5) return true
@@ -73,7 +72,6 @@ const contactForm = ref({
       return 'First name must be at least 5 characters.'
     }
   ],
-  email: contact?.value.email,
   emailRules: [
     (value) => {
       if (/^[a-z.-]+@[a-z.-]+\.[a-z]+$/i.test(value)) return true
@@ -81,7 +79,6 @@ const contactForm = ref({
       return 'Must be a valid email.'
     }
   ],
-  contact: contact?.value.contact,
   contactRules: [
     (value) => {
       if (value?.length === 9 && /[0-9-]+/.test(value)) return true
@@ -89,7 +86,6 @@ const contactForm = ref({
       return 'Phone number needs to be at least 9 digits.'
     }
   ],
-  picture: contact?.value.picture,
   pictureRules: [
     (value) => {
       if (value) return true
@@ -97,16 +93,25 @@ const contactForm = ref({
       return 'Select an picture.'
     }
   ]
-})
+}
+
+const uploadImage = async (evt) => {
+  const file = evt.target.files[0]
+  const fileExt = file.name.split('.').pop()
+  const filePath = `${Math.random()}.${fileExt}`
+  let { error: uploadError } = uploadAvatar(filePath, file)
+  form.value.picture = filePath
+}
 
 function submit() {
-  console.log(contactForm.value)
-  storeContact({
-    name: contactForm.value.name,
-    email: contactForm.value.email,
-    contact: contactForm.value.contact,
-    picture: contactForm.value.picture
-  })
+  if (formRef.value.isValid) {
+    storeContact({
+      name: form.value.name,
+      email: form.value.email,
+      contact: form.value.contact,
+      picture: form.value.picture
+    })
+  }
 
   router.push({ name: 'home' })
 }

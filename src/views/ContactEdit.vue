@@ -2,35 +2,37 @@
   <v-container fuild>
     <v-row class="mt-4">
       <v-card class="w-50 pa-4">
-        <v-card-title>Edit Contact </v-card-title>
+        <v-card-title>Edit Contact</v-card-title>
         <v-card-text>
           <v-form @submit.prevent="submit" ref="formRef">
             <v-text-field
-              v-model="contactForm.name"
+              v-model="contact.name"
               :rules="rules.nameRules"
               label="Name"
               required
             ></v-text-field>
             <v-text-field
-              v-model="contactForm.contact"
+              v-model="contact.contact"
               :rules="rules.contactRules"
               label="Phone Number"
               required
             ></v-text-field>
             <v-text-field
-              v-model="contactForm.email"
+              v-model="contact.email"
               :rules="rules.emailRules"
               label="Email"
               required
             ></v-text-field>
-            <v-file-input
-              v-model="contactForm.files"
-              :rules="rules.filesRules"
-              accept="image/*"
-              label="Picture"
-              @change="uploadImage"
-              required
-            ></v-file-input>
+            <div class="d-flex">
+              <v-avatar :image="getAvatarUrl(contact.picture)" size="large"> </v-avatar>
+              <v-file-input
+                :rules="rules.filesRules"
+                accept="image/*"
+                label="Picture"
+                @change="uploadImage"
+                required
+              ></v-file-input>
+            </div>
             <v-btn type="submit" block class="mt-2">Submit</v-btn>
           </v-form>
         </v-card-text>
@@ -39,7 +41,7 @@
   </v-container>
 </template>
 <script setup>
-import { onMounted, ref, reactive } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { useContact } from '../composables/contacts'
@@ -55,15 +57,7 @@ const formRef = ref()
 const route = useRoute()
 const router = useRouter()
 
-const { updateContact, getContact, contact, uploadAvatar } = useContact()
-
-const uploadImage = async (evt) => {
-  const file = evt.target.files[0]
-  const fileExt = file.name.split('.').pop()
-  const filePath = `${Math.random()}.${fileExt}`
-  let { error: uploadError } = uploadAvatar(filePath, file)
-  contactForm.value.picture = filePath
-}
+const { updateContact, getContact, contact, uploadAvatar, getAvatarUrl } = useContact()
 
 const rules = {
   nameRules: [
@@ -95,20 +89,22 @@ const rules = {
     }
   ]
 }
-const contactForm = reactive({
-  name: contact?.value.name,
-  email: contact?.value.email,
-  contact: contact?.value.contact,
-  picture: contact?.value.picture
-})
+
+const uploadImage = async (evt) => {
+  const file = evt.target.files[0]
+  const fileExt = file.name.split('.').pop()
+  const filePath = `${Math.random()}.${fileExt}`
+  let { error: uploadError } = uploadAvatar(filePath, file)
+  contact.value.picture = filePath
+}
 
 function submit() {
-  if (formRef.value.validate()) {
+  if (formRef.value.isValid) {
     updateContact({
-      name: contactForm.value.name,
-      email: contactForm.value.email,
-      contact: contactForm.value.contact,
-      picture: contactForm.value.picture
+      name: contact.value.name,
+      email: contact.value.email,
+      contact: contact.value.contact,
+      picture: contact.value.picture
     })
   }
 
